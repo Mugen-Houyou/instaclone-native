@@ -1,20 +1,41 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import AppLoading from 'expo-app-loading';
+import {Ionicons} from '@expo/vector-icons';
+import { useState } from 'react';
+import * as Font from 'expo-font';
+
+import LoggedOutNav from './navigators/LoggedOutNav';
+import { NavigationContainer } from '@react-navigation/native';
+import { Appearance } from 'react-native-web';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const [loading,setLoading] = useState(true);
+  const onFinish = () => setLoading(false);
+  const preload = () => {
+    const fontsToLoad = [Ionicons.font];
+    const fontPromises = fontsToLoad.map(font => Font.loadAsync(font) );
+    const imagesToLoad = [
+      require("./assets/logo.png"),
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/840px-Instagram_logo.svg.png",
+    ];
+    const imagePromises = imagesToLoad.map(image => Asset.loadAsync(image));
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+    console.log(fontPromises);
+    return Promise.all([...fontPromises, ...imagePromises]) ;
+  }
+  
+  if (loading) 
+    return <AppLoading // Apploading는 Splash-screen으로 대체 예정. https://docs.expo.dev/versions/latest/sdk/splash-screen/
+      startAsync={preload }
+      onError={console.warn} 
+      onFinish={onFinish} 
+    />
+
+  const subscription = Appearance.addChangeListener(({colorScheme}) =>{
+    console.log(colorScheme);
+  });
+  
+  return <NavigationContainer>
+    <LoggedOutNav />
+  </NavigationContainer>
+    
+}
